@@ -80,6 +80,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 
 	sess.Set("user_id", user.ID)
 	sess.Set("user_type", string(user.Type))
+	sess.Set("user_status", user.Status)
 	sess.Set("user_name", user.Name)
 
 	if saveErr := sess.Save(); saveErr != nil {
