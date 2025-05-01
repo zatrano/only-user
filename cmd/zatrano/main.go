@@ -5,9 +5,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"davet.link/configs"
-	"davet.link/routes"
-	"davet.link/utils"
+	"zatrano/configs"
+	"zatrano/routes"
+	"zatrano/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
