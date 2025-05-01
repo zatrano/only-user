@@ -199,16 +199,15 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 
 func (h *AuthHandler) UpdatePassword(c *fiber.Ctx) error {
 	userID, ok := c.Locals("userID").(uint)
+
 	if !ok {
-		if !ok {
-			utils.Log.Warn("Parola Güncelleme: Session'da geçersiz veya eksik user_id", zap.Any("value", c.Locals("userID")))
-			sess, _ := utils.SessionStart(c)
-			if sess != nil {
-				_ = sess.Destroy()
-			}
-			_ = utils.SetFlashMessage(c, utils.FlashErrorKey, "Geçersiz oturum bilgisi, lütfen tekrar giriş yapın.")
-			return c.Redirect("/auth/login", fiber.StatusSeeOther)
+		utils.Log.Warn("Parola Güncelleme: Session'da geçersiz veya eksik user_id", zap.Any("value", c.Locals("userID")))
+		sess, _ := utils.SessionStart(c)
+		if sess != nil {
+			_ = sess.Destroy()
 		}
+		_ = utils.SetFlashMessage(c, utils.FlashErrorKey, "Geçersiz oturum bilgisi, lütfen tekrar giriş yapın.")
+		return c.Redirect("/auth/login", fiber.StatusSeeOther)
 	}
 
 	var request struct {
