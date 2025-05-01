@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"davet.link/models"
+	"zatrano/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
