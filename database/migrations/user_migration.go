@@ -9,12 +9,24 @@ import (
 )
 
 func MigrateUsersTable(db *gorm.DB) error {
-	err := db.AutoMigrate(&models.User{})
+	err := db.Exec(`DO $$
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_type') THEN
+			CREATE TYPE user_type AS ENUM ('system', 'manager', 'agent');
+		END IF;
+	END$$`).Error
 	if err != nil {
-		utils.Log.Error("Failed to migrate users table", zap.Error(err))
+		utils.Log.Error("Failed to create/check user_type enum", zap.Error(err))
 		return err
 	}
+	utils.SLog.Debug("Checked/created user_type enum")
 
-	utils.SLog.Info("Users table migrated successfully")
+	err = db.AutoMigrate(&models.User{})
+	if err != nil {
+		utils.Log.Error("Failed to migrate users table structure", zap.Error(err))
+		return err
+	}
+	utils.SLog.Info("Users table structure migrated successfully")
+
 	return nil
 }
