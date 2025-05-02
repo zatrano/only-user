@@ -10,7 +10,6 @@ import (
 )
 
 func MigrateUsersTable(db *gorm.DB) error {
-	// Enum tipini oluştur
 	err := db.Exec(`CREATE TYPE user_type AS ENUM ('system', 'panel')`).Error
 	if err != nil && !isAlreadyExistsError(err) {
 		utils.Log.Error("Failed to create user_type enum", zap.Error(err))
@@ -18,7 +17,6 @@ func MigrateUsersTable(db *gorm.DB) error {
 	}
 	utils.SLog.Debug("Checked/created user_type enum")
 
-	// Users tablosunu migrate et
 	err = db.AutoMigrate(&models.User{})
 	if err != nil {
 		utils.Log.Error("Failed to migrate users table structure", zap.Error(err))
@@ -29,7 +27,6 @@ func MigrateUsersTable(db *gorm.DB) error {
 	return nil
 }
 
-// PostgreSQL enum tipi zaten varsa kontrol eder
 func isAlreadyExistsError(err error) bool {
 	return strings.Contains(err.Error(), "already exists")
 }
