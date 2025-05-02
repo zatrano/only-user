@@ -25,3 +25,7 @@ func GetEnvAsInt(key string, defaultValue int) int {
 	}
 	return valueInt
 }
+
+func IsProduction() bool {
+	return os.Getenv("APP_ENV") == "production"
+}
