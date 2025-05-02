@@ -13,16 +13,16 @@ func (e ModelError) Error() string {
 }
 
 const (
-	ErrInvalidUserType        ModelError = "geçersiz kullanıcı tipi (UserType)"
-	ErrPasswordCannotBeEmpty  ModelError = "şifre boş olamaz"
-	ErrInvalidUpdateTypeField ModelError = "güncelleme verisinde geçersiz 'type' alanı tipi"
+	ErrInvalidUserType       ModelError = "geçersiz kullanıcı tipi (UserType)"
+	ErrPasswordCannotBeEmpty ModelError = "şifre boş olamaz"
+	ErrInvalidUpdateTypeField ModelError = "güncelleme verisinde geçersiz 'type' alanı tipi" // Update için
 )
 
 type UserType string
 
 const (
-	System UserType = "system"
-	Panel  UserType = "panel"
+	System  UserType = "system"
+	Panel   UserType = "panel"
 )
 
 func (UserType) GormDataType() string {
@@ -54,7 +54,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	}
 	u.Password = string(hashed)
 
-	validTypes := map[UserType]bool{System: true, Panel: true}
+	validTypes := map[UserType]bool{System: true, Manager: true, Agent: true}
 	if _, typeIsValid := validTypes[u.Type]; !typeIsValid {
 		return ErrInvalidUserType
 	}
@@ -86,7 +86,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) (err error) {
 		userType = currentUserType
 	}
 
-	validTypes := map[UserType]bool{System: true, Panel: true}
+	validTypes := map[UserType]bool{System: true, Manager: true, Agent: true}
 	if _, typeIsValid := validTypes[userType]; !typeIsValid {
 		if string(userType) != "" {
 			return ErrInvalidUserType
@@ -109,4 +109,7 @@ func (u *User) SetPassword(password string) error {
 }
 func (u *User) CheckPassword(password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+}
+func (u *User) IsManager() bool {
+	return u.Type == Manager
 }
