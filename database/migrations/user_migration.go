@@ -1,32 +1,40 @@
 package migrations
 
 import (
-	"strings"
+	"errors"
 	"zatrano/models"
 	"zatrano/utils"
 
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 func MigrateUsersTable(db *gorm.DB) error {
-	err := db.Exec(`CREATE TYPE user_type AS ENUM ('system', 'panel')`).Error
-	if err != nil && !isAlreadyExistsError(err) {
-		utils.Log.Error("Failed to create user_type enum", zap.Error(err))
-		return err
-	}
-	utils.SLog.Debug("Checked/created user_type enum")
+	utils.SLog.Info("User tablosu için enum tipi kontrol ediliyor...")
 
-	err = db.AutoMigrate(&models.User{})
+	dropEnumQuery := `DROP TYPE IF EXISTS user_type;`
+	rawDB, err := db.DB()
 	if err != nil {
-		utils.Log.Error("Failed to migrate users table structure", zap.Error(err))
-		return err
+		return errors.New("DB instance alınamadı: " + err.Error())
 	}
-	utils.SLog.Info("Users table structure migrated successfully")
 
+	_, err = rawDB.Exec(dropEnumQuery)
+	if err != nil {
+		return errors.New("user_type enum silinemedi: " + err.Error())
+	}
+	utils.SLog.Info("user_type enum başarıyla silindi.")
+
+	createEnum := `CREATE TYPE user_type AS ENUM ('system', 'panel');`
+	_, err = rawDB.Exec(createEnum)
+	if err != nil {
+		return errors.New("user_type enum oluşturulamadı: " + err.Error())
+	}
+	utils.SLog.Info("user_type enum başarıyla oluşturuldu.")
+
+	utils.SLog.Info("User tablosu migrate ediliyor...")
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		return errors.New("User tablosu migrate edilemedi: " + err.Error())
+	}
+
+	utils.SLog.Info("User tablosu migrate işlemi tamamlandı.")
 	return nil
-}
-
-func isAlreadyExistsError(err error) bool {
-	return strings.Contains(err.Error(), "already exists")
 }
