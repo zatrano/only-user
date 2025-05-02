@@ -15,12 +15,12 @@ var Session *session.Store
 func InitSession() {
 	Session = createSessionStore()
 	utils.InitializeSessionStore(Session)
-	utils.SLog.Info("Session store initialized and registered in utils")
+	utils.SLog.Info("Oturum (session) sistemi başlatıldı ve utils içinde kayıt edildi.")
 }
 
 func SetupSession() *session.Store {
 	if Session == nil {
-		utils.SLog.Warn("Session store requested but not initialized, initializing now.")
+		utils.SLog.Warn("Session store isteniyor ancak henüz başlatılmamış, şimdi başlatılıyor.")
 		InitSession()
 	}
 	return Session
@@ -29,15 +29,17 @@ func SetupSession() *session.Store {
 func createSessionStore() *session.Store {
 	sessionExpirationHours := utils.GetEnvAsInt("SESSION_EXPIRATION_HOURS", 24)
 
+	cookieSecure := utils.IsProduction()
+
 	store := session.New(session.Config{
 		CookieHTTPOnly: false,
-		CookieSecure:   utils.GetEnvWithDefault("APP_ENV", "production"),
+		CookieSecure:   cookieSecure,
 		Expiration:     time.Duration(sessionExpirationHours) * time.Hour,
 		KeyLookup:      "cookie:session_id",
 		CookieSameSite: "Lax",
 	})
 
-	utils.SLog.Infof("Cookie-based session store configured with %d hour expiration", sessionExpirationHours)
+	utils.SLog.Infof("Cookie tabanlı session sistemi %d saatlik süreyle yapılandırıldı.", sessionExpirationHours)
 
 	registerGobTypes()
 
@@ -47,5 +49,5 @@ func createSessionStore() *session.Store {
 func registerGobTypes() {
 	gob.Register(models.UserType(""))
 	gob.Register(&models.User{})
-	utils.SLog.Debug("Registered gob types for session: models.UserType, *models.User")
+	utils.SLog.Debug("Session için gob türleri kaydedildi: models.UserType, *models.User")
 }
