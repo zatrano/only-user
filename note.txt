@@ -1,11 +1,11 @@
 Sadece migrate çalıştırma:
-go run database/cmd/main.go -migrate
+go run database/cmd/main_database.go -migrate
 
 Sadece seed çalıştırma:
-go run database/cmd/main.go -seed
+go run database/cmd/main_database.go -seed
 
 Hem migrate hem seed çalıştırma
-go run database/cmd/main.go -migrate -seed
+go run database/cmd/main_database.go -migrate -seed
 
 postgresql unaccent aktif etme
 CREATE EXTENSION IF NOT EXISTS unaccent;
